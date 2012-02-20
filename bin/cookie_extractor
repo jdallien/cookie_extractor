@@ -7,5 +7,5 @@ filename = ARGV.first
 if filename
   puts CookieExtractor::FirefoxCookieExtractor.new(filename).extract.join("\n")
 else
-  puts "Usage: cookie-extractor /path/to/cookies.sqlite"
+  puts "Usage: cookie_extractor /path/to/cookies.sqlite"
 end
