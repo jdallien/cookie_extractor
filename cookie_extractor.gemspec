@@ -1,9 +1,9 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path("../lib", __FILE__)
-require "cookie-extractor/version"
+require "cookie_extractor/version"
 
 Gem::Specification.new do |s|
-  s.name        = "cookie-extractor"
+  s.name        = "cookie_extractor"
   s.version     = CookieExtractor::VERSION
   s.authors     = ["Jeff Dallien"]
   s.email       = ["jeff@dallien.net"]
@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.summary     = %q{Create cookies.txt from Firefox or Chrome cookies}
   s.description = %q{Extract cookies from Firefox or Chrome sqlite databases into a wget-compatible cookies.txt file.}
 
-  s.rubyforge_project = "cookie-extractor"
+  s.rubyforge_project = "cookie_extractor"
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")

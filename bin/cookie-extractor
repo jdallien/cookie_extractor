@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+
+require File.expand_path(File.join(File.dirname(__FILE__), "..", "lib", "cookie_extractor"))
+
+Main do
+  # TODO: detect firefox or chrome input file and/or locate it automatically
+  filename = ARGV.first
+  if filename
+    puts CookieExtractor::FirefoxCookieExtractor.new(filename).extract.join("\n")
+  else
+    puts "Usage: cookie-extractor /path/to/cookies.sqlite"
+  end
+end
