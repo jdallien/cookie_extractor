@@ -21,6 +21,7 @@ module CookieExtractor
           row['value']
         ].join("\t")
       end
+      @result
     end
 
     private
