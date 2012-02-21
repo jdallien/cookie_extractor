@@ -7,9 +7,9 @@ Gem::Specification.new do |s|
   s.version     = CookieExtractor::VERSION
   s.authors     = ["Jeff Dallien"]
   s.email       = ["jeff@dallien.net"]
-  s.homepage    = "http://jeff.dallien.net/"
-  s.summary     = %q{Create cookies.txt from Firefox or Chrome cookies}
-  s.description = %q{Extract cookies from Firefox or Chrome sqlite databases into a wget-compatible cookies.txt file.}
+  s.homepage    = "http://github.com/jdallien/cookie_extractor"
+  s.summary     = %q{Create cookies.txt from Firefox cookies}
+  s.description = %q{Extract cookies from Firefox sqlite databases into a wget-compatible cookies.txt file.}
 
   s.rubyforge_project = "cookie_extractor"
 

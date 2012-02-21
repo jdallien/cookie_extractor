@@ -1,10 +1,17 @@
-cookie-extractor
+cookie_extractor
 ----------------
 
 Extract cookies from Firefox sqlite cookie store (eventually Chrome also) into a wget-compatible cookies.txt file.
 
-License
--------
+### Install ###
+
+gem install cookie_extractor
+
+### Usage ###
+
+cookie_extractor /path/to/firefox/cookies.sqlite > cookies.txt
+
+### License ###
 
 Copyright (c) 2012 Jeff Dallien
 
