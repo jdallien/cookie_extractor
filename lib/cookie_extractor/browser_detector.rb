@@ -1,4 +1,6 @@
 module CookieExtractor
+  class BrowserNotDetectedException < Exception; end
+
   class BrowserDetector
 
     def self.new_extractor(db_filename)

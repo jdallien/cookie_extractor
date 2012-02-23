@@ -4,9 +4,19 @@ require File.expand_path(File.join(File.dirname(__FILE__), "..", "lib", "cookie_
 
 # TODO: Locate cookie dbs automatically
 filename = ARGV.first
-if filename
-  extractor = CookieExtractor::BrowserDetector.new_extractor(filename)
-  puts extractor.extract.join("\n")
-else
+unless filename
   puts "Usage: cookie_extractor /path/to/cookies.sqlite"
+  exit
+end
+
+if File.exists?(filename)
+  begin
+    extractor = CookieExtractor::BrowserDetector.new_extractor(filename)
+    puts extractor.extract.join("\n")
+  rescue SQLite3::NotADatabaseException,
+    CookieExtractor::BrowserNotDetectedException
+    puts "Error: File '#{filename}' is not a Firefox or Chrome cookie database"
+  end
+else
+  puts "Error: File '#{filename}' does not exist"
 end
