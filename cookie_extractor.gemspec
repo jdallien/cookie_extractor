@@ -8,8 +8,8 @@ Gem::Specification.new do |s|
   s.authors     = ["Jeff Dallien"]
   s.email       = ["jeff@dallien.net"]
   s.homepage    = "http://github.com/jdallien/cookie_extractor"
-  s.summary     = %q{Create cookies.txt from Firefox cookies}
-  s.description = %q{Extract cookies from Firefox sqlite databases into a wget-compatible cookies.txt file.}
+  s.summary     = %q{Create cookies.txt from Firefox or Chrome/Chromium cookies}
+  s.description = %q{Extract cookies from Firefox, Chrome or Chromium sqlite databases into a wget-compatible cookies.txt file.}
 
   s.rubyforge_project = "cookie_extractor"
 
@@ -18,6 +18,6 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  s.add_development_dependency "rspec"
-  s.add_runtime_dependency "sqlite3-ruby"
+  s.add_development_dependency "rspec", "~> 2.8"
+  s.add_runtime_dependency "sqlite3-ruby", "~> 1.3"
 end
