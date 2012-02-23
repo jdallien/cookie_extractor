@@ -12,6 +12,7 @@ gem install cookie_extractor
 cookie_extractor /path/to/firefox/cookies.sqlite > cookies.txt
 
 Typical locations for the cookies file on Linux are:
+
  * Firefox: ~/.mozilla/firefox/<profile directory>/cookies.sqlite
  * Chrome: ~/.config/google-chrome/Default/Cookies
  * Chromium: ~/.config/chromium/Default/Cookies
