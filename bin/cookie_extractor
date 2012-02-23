@@ -5,7 +5,8 @@ require File.expand_path(File.join(File.dirname(__FILE__), "..", "lib", "cookie_
 # TODO: Locate cookie dbs automatically
 filename = ARGV.first
 unless filename
-  puts "Usage: cookie_extractor /path/to/cookies.sqlite"
+  puts "Usage: (Firefox) cookie_extractor /path/to/cookies.sqlite"
+  puts "       (Chrome)  cookie_extractor /path/to/Cookies"
   exit
 end
 
