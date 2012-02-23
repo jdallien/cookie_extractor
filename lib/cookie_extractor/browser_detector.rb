@@ -8,7 +8,7 @@ module CookieExtractor
       if browser
         CookieExtractor.const_get("#{browser}CookieExtractor").new(db_filename)
       else
-        raise "Could not detect browser type."
+        raise BrowserNotDetectedException, "Could not detect browser type."
       end
     end
 
