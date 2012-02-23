@@ -1,7 +1,7 @@
 cookie_extractor
 ----------------
 
-Extract cookies from Firefox sqlite cookie store (eventually Chrome also) into a wget-compatible cookies.txt file.
+Extract cookies from Firefox, Chrome or Chromium sqlite cookie stores into a wget-compatible cookies.txt file.
 
 ### Install ###
 
@@ -10,6 +10,11 @@ gem install cookie_extractor
 ### Usage ###
 
 cookie_extractor /path/to/firefox/cookies.sqlite > cookies.txt
+
+Typical locations for the cookies file on Linux are:
+ * Firefox: ~/.mozilla/firefox/<profile directory>/cookies.sqlite
+ * Chrome: ~/.config/google-chrome/Default/Cookies
+ * Chromium: ~/.config/chromium/Default/Cookies
 
 ### License ###
 
