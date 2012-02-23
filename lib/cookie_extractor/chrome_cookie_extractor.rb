@@ -11,9 +11,9 @@ module CookieExtractor
     def extract
       db = SQLite3::Database.new @cookie_file
       db.results_as_hash = true
-      @result = []
+      result = []
       db.execute("SELECT * FROM cookies") do |row|
-        @result << [ row['host_key'],
+        result << [ row['host_key'],
           true_false_word(is_domain_wide(row['host_key'])),
           row['path'],
           true_false_word(row['secure']),
@@ -22,7 +22,8 @@ module CookieExtractor
           row['value']
         ].join("\t")
       end
-      @result
+      db.close
+      result
     end
   end
 end

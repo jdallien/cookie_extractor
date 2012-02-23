@@ -2,10 +2,30 @@ require File.join(File.dirname(__FILE__), "spec_helper")
 
 describe CookieExtractor::ChromeCookieExtractor do
   before :each do
-    @fake_cookie_db = double("cookie database", :results_as_hash= => true)
+    @fake_cookie_db = double("cookie database",
+      :results_as_hash= => true,
+      :close => true)
     SQLite3::Database.should_receive(:new).
       with('filename').
         and_return(@fake_cookie_db)
+  end
+
+  describe "opening and closing a sqlite db" do
+    before :each do
+      @fake_cookie_db.should_receive(:execute).and_yield(
+        { 'host_key' => '.dallien.net',
+          'path' => '/',
+          'secure' => '0',
+          'expires_utc' => '1234567890',
+          'name' => 'NAME',
+          'value' => 'VALUE'})
+      @extractor = CookieExtractor::ChromeCookieExtractor.new('filename')
+    end
+
+    it "should close the db when finished" do
+      @fake_cookie_db.should_receive(:close)
+      @extractor.extract
+    end
   end
 
   describe "with a cookie that has a host starting with a dot" do
