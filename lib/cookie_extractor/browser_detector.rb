@@ -4,12 +4,13 @@ module CookieExtractor
   class NoCookieFileFoundException < Exception; end
 
   class BrowserDetector
+    attr_reader :cookie_locations
+
     @cookie_locations = {
       "chrome" => "~/.config/google-chrome/Default/Cookies",
       "chromium" => "~/.config/chromium/Default/Cookies",
       "firefox" => "~/.mozilla/firefox/*.default/cookies.sqlite"
     }
-
 
     # Returns the extractor of the most recently used browser's cookies
     #   or raise NoCookieFileFoundException if there are no cookies
