@@ -2,22 +2,46 @@
 
 require File.expand_path(File.join(File.dirname(__FILE__), "..", "lib", "cookie_extractor"))
 
-# TODO: Locate cookie dbs automatically
-filename = ARGV.first
-unless filename
-  puts "Usage: (Firefox) cookie_extractor /path/to/cookies.sqlite"
-  puts "       (Chrome)  cookie_extractor /path/to/Cookies"
+
+def usage msg=nil
+  puts msg if msg
+  puts "Usage: cookie_extractor /path/to/cookies.sqlite              Open a DB file"
+  puts "       cookie_extractor --guess                              Guess which browser to use and open corresponding file"
+  puts "       cookie_extractor --browser chrome|chromium|firefox    Open DB corresponding to a particular browser"
   exit
 end
 
-if File.exists?(filename)
-  begin
-    extractor = CookieExtractor::BrowserDetector.new_extractor(filename)
-    puts extractor.extract.join("\n")
-  rescue SQLite3::NotADatabaseException,
-    CookieExtractor::BrowserNotDetectedException
-    puts "Error: File '#{filename}' is not a Firefox or Chrome cookie database"
-  end
-else
-  puts "Error: File '#{filename}' does not exist"
+
+begin
+  extractor =
+    case ARGV.first
+    when '--guess', '-g'
+      begin
+        CookieExtractor::BrowserDetector.guess()
+      rescue CookieExtractor::NoCookieFileFoundException
+        abort "Error: we couldn't find any supported broswer's cookies"
+      end
+    when '--browser', '-b'
+      browser = ARGV[1]
+      usage "Error: Please supply a browser name" unless browser
+      begin
+        CookieExtractor::BrowserDetector.browser_extractor(browser)
+      rescue CookieExtractor::InvalidBrowserNameException
+        abort "Error: '#{browser}' is not a valid browser name"
+      rescue CookieExtractor::NoCookieFileFoundException
+        abort "Error: Could not locate cookie file for browser #{browser}"
+      end
+    when nil
+      usage
+    else
+      filename = ARGV.first
+      abort "Error: #{filename} does not exist" unless File.exists?(filename)
+      CookieExtractor::BrowserDetector.new_extractor(filename)
+    end
+  puts extractor.extract.join("\n")
+rescue SQLite3::NotADatabaseException,
+  CookieExtractor::BrowserNotDetectedException        
+  abort "Error: File '#{filename}' is not a Firefox or Chrome cookie database"
 end
+
+

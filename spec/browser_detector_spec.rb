@@ -40,4 +40,26 @@ describe CookieExtractor::BrowserDetector, "determining the correct extractor to
       extractor.instance_of?(CookieExtractor::ChromeCookieExtractor).should be_true
     end
   end
+
+  describe "when no cookie files are found in the standard locations" do
+    before :each do
+      Dir.stub!(:glob).and_return([])
+    end
+
+    it "should raise NoCookieFileFoundException" do
+      lambda { CookieExtractor::BrowserDetector.guess }.
+        should raise_error(CookieExtractor::NoCookieFileFoundException)
+    end
+  end
+
+  describe "when multiple cookie files are found in the standard locations" do
+    before :each do
+      Dir.stub!(:glob).and_return(CookieExtractor::BrowserDetector.cookie_locations.values)
+    end
+
+    it "should return a ChromeCookieExtractor or FirefoxCookieExtractor" do
+      lambda { CookieExtractor::BrowserDetector.guess }.
+        should be_kind_of(CookieExtractor::Common)
+    end
+  end
 end

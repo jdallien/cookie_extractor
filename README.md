@@ -5,17 +5,22 @@ Extract cookies from Firefox, Chrome or Chromium sqlite cookie stores into a wge
 
 ### Install ###
 
-gem install cookie_extractor
+    gem install cookie_extractor
 
 ### Usage ###
 
-cookie_extractor /path/to/firefox/cookies.sqlite > cookies.txt
+    cookie_extractor /path/to/firefox/cookies.sqlite > cookies.txt
+    
+    cookie_extractor --guess    # Guess which browser to use and open corresponding file
+    
+    cookie_extractor --browser chrome|chromium|firefox    # Open corresponding  DB
+
 
 Typical locations for the cookies file on Linux are:
 
- * Firefox: ~/.mozilla/firefox/(profile directory)/cookies.sqlite
- * Chrome: ~/.config/google-chrome/Default/Cookies
- * Chromium: ~/.config/chromium/Default/Cookies
+ * Firefox: *~/.mozilla/firefox/(profile directory)/cookies.sqlite*
+ * Chrome: *~/.config/google-chrome/Default/Cookies*
+ * Chromium: *~/.config/chromium/Default/Cookies*
 
 ### License ###
 
