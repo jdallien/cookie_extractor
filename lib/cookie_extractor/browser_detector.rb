@@ -4,9 +4,7 @@ module CookieExtractor
   class NoCookieFileFoundException < Exception; end
 
   class BrowserDetector
-    attr_reader :cookie_locations
-
-    @cookie_locations = {
+    COOKIE_LOCATIONS = {
       "chrome" => "~/.config/google-chrome/Default/Cookies",
       "chromium" => "~/.config/chromium/Default/Cookies",
       "firefox" => "~/.mozilla/firefox/*.default/cookies.sqlite"
@@ -15,12 +13,7 @@ module CookieExtractor
     # Returns the extractor of the most recently used browser's cookies
     #   or raise NoCookieFileFoundException if there are no cookies
     def self.guess
-      full_cookie_locations = @cookie_locations.select { |browser, path|
-          !Dir.glob(File.expand_path(path)).empty?
-      }.sort_by { |browser, path|
-        File.mtime(Dir.glob(File.expand_path(path)).first)
-      }.reverse.each { |tuple|
-        browser = tuple.first
+      most_recently_used_detected_browsers.each { |browser, path|
         begin
           extractor = self.browser_extractor(browser)
         rescue BrowserNotDetectedException, NoCookieFileFoundException
@@ -36,7 +29,7 @@ module CookieExtractor
     # Open a browser's cookie file using intelligent guesswork
     def self.browser_extractor(browser)
       raise InvalidBrowserNameException, "Browser must be one of: #{self.supported_browsers.join(', ')}" unless self.supported_browsers.include?(browser)
-      paths = Dir.glob(File.expand_path(@cookie_locations[browser]))
+      paths = Dir.glob(File.expand_path(COOKIE_LOCATIONS[browser]))
       if paths.length < 1 or not File.exists?(paths.first)
         raise NoCookieFileFoundException, "File #{paths.first} does not exist!"
       end
@@ -53,7 +46,7 @@ module CookieExtractor
     end
 
     def self.supported_browsers
-      @cookie_locations.keys
+      COOKIE_LOCATIONS.keys
     end
 
     def self.detect_browser(db_filename)
@@ -71,5 +64,15 @@ module CookieExtractor
     def self.has_table?(db, table_name)
       db.table_info(table_name).size > 0
     end
+
+    def self.most_recently_used_detected_browsers
+      COOKIE_LOCATIONS.select { |browser, path|
+        Dir.glob(File.expand_path(path)).any?
+      }.sort_by { |browser, path|
+        File.mtime(Dir.glob(File.expand_path(path)).first)
+      }.reverse
+    end
+
+    private_class_method :most_recently_used_detected_browsers
   end
 end
