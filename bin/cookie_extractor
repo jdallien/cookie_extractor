@@ -19,7 +19,7 @@ begin
       begin
         CookieExtractor::BrowserDetector.guess()
       rescue CookieExtractor::NoCookieFileFoundException
-        abort "Error: we couldn't find any supported broswer's cookies"
+        abort "Error: we couldn't find any supported browser's cookies"
       end
     when '--browser', '-b'
       browser = ARGV[1]
