@@ -12,6 +12,7 @@ describe CookieExtractor::FirefoxCookieExtractor do
 
   describe "opening and closing a sqlite db" do
     before :each do
+      expect(@fake_cookie_db).to receive(:get_first_value).and_return(15)
       expect(@fake_cookie_db).to receive(:execute).and_yield(
         {'host' => '.dallien.net',
           'path' => '/',
@@ -30,6 +31,7 @@ describe CookieExtractor::FirefoxCookieExtractor do
 
   describe "with a cookie that has a host starting with a dot" do
     before :each do
+      expect(@fake_cookie_db).to receive(:get_first_value).and_return(15)
       expect(@fake_cookie_db).to receive(:execute).and_yield(
         {'host' => '.dallien.net',
           'path' => '/',
@@ -64,6 +66,7 @@ describe CookieExtractor::FirefoxCookieExtractor do
 
   describe "with a cookie that has a host not starting with a dot" do
     before :each do
+      expect(@fake_cookie_db).to receive(:get_first_value).and_return(15)
       expect(@fake_cookie_db).to receive(:execute).and_yield(
         { 'host' => 'jeff.dallien.net',
           'path' => '/path',
@@ -98,6 +101,7 @@ describe CookieExtractor::FirefoxCookieExtractor do
 
   describe "with a cookie that is not marked as secure" do
     before :each do
+      expect(@fake_cookie_db).to receive(:get_first_value).and_return(15)
       expect(@fake_cookie_db).to receive(:execute).and_yield(
         {'host' => '.dallien.net',
           'path' => '/',
@@ -117,6 +121,7 @@ describe CookieExtractor::FirefoxCookieExtractor do
 
   describe "with a cookie that is marked as secure" do
     before :each do
+      expect(@fake_cookie_db).to receive(:get_first_value).and_return(15)
       expect(@fake_cookie_db).to receive(:execute).and_yield(
         {'host' => '.dallien.net',
           'path' => '/',
