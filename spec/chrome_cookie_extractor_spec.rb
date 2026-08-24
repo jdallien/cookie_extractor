@@ -141,6 +141,26 @@ describe CookieExtractor::ChromeCookieExtractor do
       cookie_string = @result.first
       expect(cookie_string.split("\t")[3]).to eq("TRUE")
     end
+  end
 
+  describe "with domain filter" do
+    before :each do
+      expect(@fake_cookie_db).to receive(:execute) do |&block|
+        block.call({'host_key' => '.example.com', 'path' => '/', 'is_secure' => '0', 'expires_utc' => '1787601234000', 'name' => 'NAME', 'value' => 'EXAMPLE VALUE'})
+        block.call({'host_key' => '.other.test', 'path' => '/', 'is_secure' => '0', 'expires_utc' => '1787601234000', 'name' => 'NAME2', 'value' => 'OTHER VALUE'})
+      end
+      @extractor = CookieExtractor::ChromeCookieExtractor.new('filename')
+    end
+
+    it "returns correct domain" do
+      result = @extractor.extract(domain: "example.com", format: :hash)
+      expect(result.size).to eq(1)
+      expect(result.first[:value]).to eq("EXAMPLE VALUE")
+    end
+
+    it "returns all when domain is nil" do
+      result = @extractor.extract(format: :hash)
+      expect(result.size).to eq(2)
+    end
   end
 end

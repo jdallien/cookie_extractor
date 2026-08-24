@@ -138,4 +138,28 @@ describe CookieExtractor::FirefoxCookieExtractor do
       expect(cookie_string.split("\t")[3]).to eq("TRUE")
     end
   end
+
+  describe "with domain filter" do
+    before :each do
+      expect(@fake_cookie_db).to receive(:get_first_value).and_return(16)
+      expect(@fake_cookie_db).to receive(:execute) do |&block|
+        block.call({'host' => '.example.com', 'path' => '/', 'isSecure' => '0', 'expiry' => '1787601234000', 'name' => 'NAME', 'value' => 'EXAMPLE VALUE'})
+        block.call({'host' => '.other.test', 'path' => '/', 'isSecure' => '0', 'expiry' => '1787601234000', 'name' => 'NAME2', 'value' => 'OTHER VALUE'})
+      end
+      @extractor = CookieExtractor::FirefoxCookieExtractor.new('filename')
+      allow(@fake_cookie_db).to receive(:close)
+    end
+
+    it "returns correct domain" do
+      result = @extractor.extract(domain: "example.com", format: :hash)
+      expect(result.size).to eq(1)
+      expect(result.first[:value]).to eq("EXAMPLE VALUE")
+      expect(result.first[:expires]).to eq(1787601234)
+    end
+
+    it "returns all when domain is nil" do
+      result = @extractor.extract(format: :hash)
+      expect(result.size).to eq(2)
+    end
+  end
 end

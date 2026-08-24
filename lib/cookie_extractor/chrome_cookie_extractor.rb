@@ -8,20 +8,15 @@ module CookieExtractor
       @cookie_file = cookie_file
     end
 
-    def extract
+    def extract(format: :netscape, domain: nil)
       db = SQLite3::Database.new @cookie_file
       db.results_as_hash = true
       result = []
       db.execute("SELECT * FROM cookies") do |row|
+        next unless domain.nil? || cookie_applies?(row['host_key'], domain)
+
         secure = row.key?('is_secure') ? row['is_secure'] : row['secure']
-        result << [ row['host_key'],
-          true_false_word(is_domain_wide(row['host_key'])),
-          row['path'],
-          true_false_word(secure),
-          row['expires_utc'],
-          row['name'],
-          row['value']
-        ].join("\t")
+        result << cookie_line(row['host_key'], row['path'], secure, row['expires_utc'], row['name'], row['value'], format: format)
       end
       db.close
       result
