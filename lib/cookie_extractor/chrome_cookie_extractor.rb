@@ -13,10 +13,11 @@ module CookieExtractor
       db.results_as_hash = true
       result = []
       db.execute("SELECT * FROM cookies") do |row|
+        secure = row.key?('is_secure') ? row['is_secure'] : row['secure']
         result << [ row['host_key'],
           true_false_word(is_domain_wide(row['host_key'])),
           row['path'],
-          true_false_word(row['secure']),
+          true_false_word(secure),
           row['expires_utc'],
           row['name'],
           row['value']

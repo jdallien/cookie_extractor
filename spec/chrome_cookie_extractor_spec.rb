@@ -123,4 +123,24 @@ describe CookieExtractor::ChromeCookieExtractor do
       expect(cookie_string.split("\t")[3]).to eq("TRUE")
     end
   end
+
+  describe "with is_secure column" do
+    before :each do
+      expect(@fake_cookie_db).to receive(:execute).and_yield(
+        { 'host_key' => '.dallien.net',
+          'path' => '/',
+          'is_secure' => '1',
+          'expires_utc' => '1234567890',
+          'name' => 'NAME',
+          'value' => 'VALUE'})
+      @extractor = CookieExtractor::ChromeCookieExtractor.new('filename')
+      @result = @extractor.extract
+    end
+
+    it "should put TRUE in the secure field" do
+      cookie_string = @result.first
+      expect(cookie_string.split("\t")[3]).to eq("TRUE")
+    end
+
+  end
 end
