@@ -35,7 +35,7 @@ begin
       usage
     else
       filename = ARGV.first
-      abort "Error: #{filename} does not exist" unless File.exists?(filename)
+      abort "Error: #{filename} does not exist" unless File.exist?(filename)
       CookieExtractor::BrowserDetector.new_extractor(filename)
     end
   puts extractor.extract.join("\n")

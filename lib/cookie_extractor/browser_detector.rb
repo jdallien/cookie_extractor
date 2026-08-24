@@ -30,7 +30,7 @@ module CookieExtractor
     def self.browser_extractor(browser)
       raise InvalidBrowserNameException, "Browser must be one of: #{self.supported_browsers.join(', ')}" unless self.supported_browsers.include?(browser)
       paths = Dir.glob(File.expand_path(COOKIE_LOCATIONS[browser]))
-      if paths.length < 1 or not File.exists?(paths.first)
+      if paths.length < 1 or not File.exist?(paths.first)
         raise NoCookieFileFoundException, "File #{paths.first} does not exist!"
       end
       self.new_extractor(paths.first)
