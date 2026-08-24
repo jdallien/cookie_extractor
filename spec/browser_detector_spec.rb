@@ -56,10 +56,14 @@ describe CookieExtractor::BrowserDetector, "guessing the location of the cookie 
 
   describe "when multiple cookie files are found in the standard locations" do
     before :each do
-      cookie_locations = CookieExtractor::BrowserDetector::COOKIE_LOCATIONS
-      allow(Dir).to receive(:glob).and_return([cookie_locations['chrome']],
-                                  [],
-                                  [cookie_locations['firefox']])
+      chrome_path = File.expand_path(CookieExtractor::BrowserDetector.cookie_locations("chrome").first)
+      firefox_path = File.expand_path(CookieExtractor::BrowserDetector.cookie_locations("firefox").first)
+      allow(Dir).to receive(:glob).and_return(
+        [chrome_path],
+        [],
+        [firefox_path],
+        []
+      )
     end
 
     describe "and chrome was the most recently used" do
@@ -70,9 +74,10 @@ describe CookieExtractor::BrowserDetector, "guessing the location of the cookie 
       end
 
       it "should build a ChromeCookieExtractor" do
+        chrome_path = File.expand_path(CookieExtractor::BrowserDetector.cookie_locations("chrome").first)
         expect(CookieExtractor::BrowserDetector).
           to receive(:browser_extractor).
-            once.with("chrome")
+            once.with(nil, chrome_path)
         CookieExtractor::BrowserDetector.guess
       end
     end
