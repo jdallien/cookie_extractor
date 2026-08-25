@@ -1,6 +1,34 @@
+require 'uri'
+require 'sqlite3'
+
 module CookieExtractor
   module Common
     private
+
+    def self.with_sqlite(path)
+      flags = SQLite3::Constants::Open::READONLY | SQLite3::Constants::Open::URI
+      db = nil
+      begin
+        db = SQLite3::Database.new(file_uri(path, :immutable => 0).to_s, flags: flags)
+        db.execute("SELECT name FROM sqlite_schema LIMIT 1;")
+      rescue SQLite3::BusyException
+        db = SQLite3::Database.new(file_uri(path, :immutable => 1).to_s, flags: flags)
+      end
+      db.results_as_hash = true
+      yield db
+    ensure
+      db&.close
+    end
+
+    def with_sqlite(path, &block)
+      Common::with_sqlite(path, &block)
+    end
+
+    def self.file_uri(path, query)
+      path = File.expand_path(path)
+      URI::File.build(:path => URI::RFC2396_PARSER.escape(path),
+                      :query => query ? URI.encode_www_form(query) : nil)
+    end
 
     def is_domain_wide(hostname)
       hostname[0..0] == "."

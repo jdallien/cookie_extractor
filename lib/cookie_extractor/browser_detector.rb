@@ -1,3 +1,5 @@
+require_relative 'common'
+
 module CookieExtractor
   class BrowserNotDetectedException < Exception; end
   class InvalidBrowserNameException < Exception; end
@@ -47,14 +49,15 @@ module CookieExtractor
     end
 
     def self.detect_browser(db_filename)
-      db = SQLite3::Database.new(db_filename)
-      browser = 
-        if has_table?(db, 'moz_cookies')
-          'Firefox'
-        elsif has_table?(db, 'cookies')
-          'Chrome'
-        end
-      db.close
+      browser = nil
+      Common::with_sqlite(db_filename) do |db|
+        browser =
+          if has_table?(db, 'moz_cookies')
+            'Firefox'
+          elsif has_table?(db, 'cookies')
+            'Chrome'
+          end
+      end
       browser
     end
 

@@ -2,10 +2,9 @@ require File.join(File.dirname(__FILE__), "spec_helper")
 
 describe CookieExtractor::BrowserDetector, "determining the correct extractor to use" do
   before :each do
-    @fake_cookie_db = double("cookie database", :close => true)
-    expect(SQLite3::Database).to receive(:new).
-      with('filename').
-        and_return(@fake_cookie_db)
+    @fake_cookie_db = double("cookie database")
+    allow(CookieExtractor::Common).to receive(:with_sqlite).and_call_original
+    allow(CookieExtractor::Common).to receive(:with_sqlite).with('filename').and_yield(@fake_cookie_db)
   end
 
   describe "given a sqlite database with a 'moz_cookies' table" do
@@ -38,6 +37,24 @@ describe CookieExtractor::BrowserDetector, "determining the correct extractor to
     it "should return a chrome extractor instance" do
       extractor = CookieExtractor::BrowserDetector.new_extractor('filename')
       expect(extractor.instance_of?(CookieExtractor::ChromeCookieExtractor)).to be true
+    end
+  end
+
+  describe "with real opened DB" do
+    it "reads cookies even when DB is locked" do
+      path = create_sqlite_db(
+        [["item", "value", ".example.org", "/", 123, 1]],
+        table_name: "moz_cookies",
+        table_sql: "CREATE TABLE moz_cookies (name TEXT, value TEXT, host TEXT, path TEXT, expiry INTEGER, isSecure INTEGER)"
+      )
+      db = SQLite3::Database.new(path)
+      db.execute("BEGIN EXCLUSIVE")
+      begin
+        extractor = CookieExtractor::BrowserDetector.new_extractor(path)
+        expect(extractor.extract(format: false)).to eq([{domain: ".example.org", expires: 123, name: "item", path: "/", secure: true, value: "value"}])
+      ensure
+        db.close
+      end
     end
   end
 end
