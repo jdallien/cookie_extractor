@@ -139,4 +139,60 @@ describe CookieExtractor::FirefoxCookieExtractor do
       expect(result.size).to eq(2)
     end
   end
+
+  describe "with session cookies" do
+    def build_recovery_data(cookies)
+      json = JSON.generate("cookies" => cookies)
+      compressed = LZ4.block_encode(json)
+      header = "mozLz40\0"
+      size = [json.bytesize].pack("V")
+      header + size + compressed
+    end
+
+    let (:recovery_path) { File.dirname('filename') + '/sessionstore-backups/recovery.jsonlz4' }
+    let (:recovery_data) {
+      build_recovery_data([
+        {"host" => ".example.com", "path" => "/", "secure" => true, "name" => "SESSION", "value" => "SESSION VALUE"},
+        {"host" => "another.example.org", "path" => "/", "secure" => true, "name" => "SESSION2", "value" => "SESSION2 VALUE"}
+      ])
+    }
+
+    before :each do
+      allow(CookieExtractor::Common).to receive(:with_sqlite).with('filename').and_yield(@fake_cookie_db)
+      allow(File).to receive(:exist?).and_call_original
+      allow(File).to receive(:read).and_call_original
+      expect(@fake_cookie_db).to receive(:get_first_value).and_return(16)
+      expect(@fake_cookie_db).to receive(:execute).and_yield(
+        {'host' => '.dallien.net', 'path' => '/', 'isSecure' => '0', 'expiry' => '1234567890', 'name' => 'PERSISTENT', 'value' => 'PERSISTENT VALUE'}
+      )
+    end
+
+    it "returns persistent + session cookies" do
+      allow(File).to receive(:exist?).with(recovery_path).and_return(true)
+      allow(File).to receive(:read).with(recovery_path).and_return(recovery_data)
+      extractor = CookieExtractor::FirefoxCookieExtractor.new('filename')
+      result = extractor.extract(format: :hash)
+      expect(result.size).to eq(3)
+      expect(result.first).to eq({domain: ".dallien.net", expires: 1234567, name: "PERSISTENT", path: "/", secure: false, value: "PERSISTENT VALUE"})
+      expect(result.last).to eq({domain: "another.example.org", expires: 0, name: "SESSION2", path: "/", secure: true, value: "SESSION2 VALUE"})
+    end
+
+    it "filters session cookies by domain" do
+      allow(File).to receive(:exist?).with(recovery_path).and_return(true)
+      allow(File).to receive(:read).with(recovery_path).and_return(recovery_data)
+      extractor = CookieExtractor::FirefoxCookieExtractor.new('filename')
+      result = extractor.extract(domain: ".example.org", format: :hash)
+      expect(result).to eq([{domain: "another.example.org", expires: 0, name: "SESSION2", path: "/", secure: true, value: "SESSION2 VALUE"}])
+    end
+
+    it "returns only persistent when recovery file missing" do
+      allow(File).to receive(:exist?).with(recovery_path).and_return(false)
+      expect(File).not_to receive(:read).with(recovery_path)
+
+      extractor = CookieExtractor::FirefoxCookieExtractor.new('filename')
+      result = extractor.extract(format: :hash)
+      expect(result.size).to eq(1)
+      expect(result.first[:value]).to eq("PERSISTENT VALUE")
+    end
+  end
 end

@@ -30,6 +30,20 @@ module CookieExtractor
                       :query => query ? URI.encode_www_form(query) : nil)
     end
 
+    def file_binread(path, retries: 5, delay: 0.05)
+      attempts = 1
+      begin
+        File.read(path)
+      rescue Errno::ENOENT => error
+        attempts += 1
+        if attempts <= retries
+          sleep(delay)
+          retry
+        end
+        raise error
+      end
+    end
+
     def is_domain_wide(hostname)
       hostname[0..0] == "."
     end

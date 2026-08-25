@@ -1,3 +1,5 @@
+require 'json'
+require 'extlz4'
 
 require_relative 'common'
 
@@ -7,9 +9,15 @@ module CookieExtractor
 
     def initialize(cookie_file)
       @cookie_file = cookie_file
+      @recovery_file = File.dirname(@cookie_file) + '/sessionstore-backups/recovery.jsonlz4'
+      @recovery_file = nil unless File.exist?(@recovery_file)
     end
 
     def extract(format: :netscape, domain: nil)
+      persistent_cookies(format: format, domain: domain) + session_cookies(format: format, domain: domain)
+    end
+
+    def persistent_cookies(format:, domain:)
       result = []
       with_sqlite(@cookie_file) do |db|
         schema_version = db.get_first_value('PRAGMA user_version;').to_i
@@ -24,5 +32,21 @@ module CookieExtractor
       end
       result
     end
+
+    def session_cookies(format:, domain:)
+      return [] unless @recovery_file
+      data = file_binread(@recovery_file)
+      if data[0..7] == "mozLz40\0"
+         json = LZ4.block_decode(data[12..-1])
+         recovery = JSON.parse(json)
+         recovery['cookies'].to_a.filter_map do |cookie|
+           next unless domain.nil? || cookie_applies?(cookie['host'], domain)
+           cookie_line(cookie['host'], cookie['path'], !!cookie['secure'], 0, cookie['name'], cookie['value'], format: format)
+         end
+      else
+        []
+      end
+    end
+
   end
 end
