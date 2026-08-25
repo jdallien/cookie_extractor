@@ -139,4 +139,31 @@ describe CookieExtractor::Common do
       end
     end
   end
+
+  describe "#file_binread" do
+    it "retries on ENOENT and succeeds" do
+      attempts = 0
+      allow(File).to receive(:read) do |_path|
+        attempts += 1
+        raise Errno::ENOENT, "no file" if attempts < 3
+        "content"
+      end
+      allow(Kernel).to receive(:sleep)
+      result = common.send(:file_binread, "/tmp/missing", retries: 5, delay: 0.01)
+      expect(result).to eq("content")
+      expect(attempts).to eq(3)
+    end
+
+    it "raises after retries exhausted" do
+      allow(File).to receive(:read).and_raise(Errno::ENOENT, "no file")
+      allow(Kernel).to receive(:sleep)
+      expect { common.send(:file_binread, "/tmp/missing", retries: 2, delay: 0.01) }.to raise_error(Errno::ENOENT)
+    end
+
+    it "does not retry on other errors" do
+      allow(File).to receive(:read).and_raise(Errno::EACCES, "permission")
+      expect(Kernel).not_to receive(:sleep)
+      expect { common.send(:file_binread, "/tmp/test") }.to raise_error(Errno::EACCES)
+    end
+  end
 end
