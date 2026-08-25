@@ -19,7 +19,7 @@ begin
       begin
         CookieExtractor::BrowserDetector.guess()
       rescue CookieExtractor::NoCookieFileFoundException
-        abort "Error: we couldn't find any supported broswer's cookies"
+        abort "Error: we couldn't find any supported browser's cookies"
       end
     when '--browser', '-b'
       browser = ARGV[1]
@@ -35,7 +35,7 @@ begin
       usage
     else
       filename = ARGV.first
-      abort "Error: #{filename} does not exist" unless File.exists?(filename)
+      abort "Error: #{filename} does not exist" unless File.exist?(filename)
       CookieExtractor::BrowserDetector.new_extractor(filename)
     end
   puts extractor.extract.join("\n")
