@@ -94,7 +94,7 @@ describe CookieExtractor::BrowserDetector, "guessing the location of the cookie 
         chrome_path = File.expand_path(CookieExtractor::BrowserDetector.cookie_locations("chrome").first)
         expect(CookieExtractor::BrowserDetector).
           to receive(:browser_extractor).
-            once.with(nil, chrome_path)
+            once.with(nil, path: chrome_path, secrets: [])
         CookieExtractor::BrowserDetector.guess
       end
     end

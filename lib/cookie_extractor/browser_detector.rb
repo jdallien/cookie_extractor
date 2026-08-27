@@ -11,10 +11,10 @@ module CookieExtractor
 
     # Returns the extractor of the most recently used browser's cookies
     #   or raise NoCookieFileFoundException if there are no cookies
-    def self.guess
+    def self.guess(secrets: [])
       most_recently_used_detected_browsers.each { |path|
         begin
-          extractor = self.browser_extractor(nil, path)
+          extractor = self.browser_extractor(nil, path: path, secrets: secrets)
         rescue BrowserNotDetectedException, NoCookieFileFoundException
           # better try the next one...
         else
@@ -26,19 +26,20 @@ module CookieExtractor
     end
 
     # Open a browser's cookie file using intelligent guesswork
-    def self.browser_extractor(app, path = nil)
+    def self.browser_extractor(app, path: nil, secrets: [])
       raise InvalidBrowserNameException, "App/Browser must be one of: #{self.supported_apps.join(', ')}" unless app.nil? || self.supported_apps.include?(app)
       paths = path.nil? ? most_recently_used(cookie_locations(app)) : [path]
       if paths.length < 1 or not File.exist?(paths.first)
         raise NoCookieFileFoundException, "File #{paths.first} does not exist!"
       end
-      self.new_extractor(paths.first)
+      self.new_extractor(paths.first, app: app, secrets: secrets)
     end
 
-    def self.new_extractor(db_filename)
+    def self.new_extractor(db_filename, app: nil, secrets: [])
       browser = detect_browser(db_filename)
       if browser
-        CookieExtractor.const_get("#{browser}CookieExtractor").new(db_filename)
+        app = detect_app(db_filename) unless app
+        CookieExtractor.const_get("#{browser}CookieExtractor").new(db_filename, app: app, secrets: secrets)
       else
         raise BrowserNotDetectedException, "Could not detect browser type."
       end
@@ -59,6 +60,20 @@ module CookieExtractor
           end
       end
       browser
+    end
+
+    def self.detect_app(db_filename)
+      case db_filename.split('/')[-3]
+      when 'firefox'
+        :firefox
+      when 'google-chrome'
+        :chrome
+      when 'chromium'
+        :chromium
+      else
+        # Unknown so fallback as chromium
+        :chromium
+      end
     end
 
     def self.has_table?(db, table_name)

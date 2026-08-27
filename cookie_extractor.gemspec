@@ -21,4 +21,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rspec", "~> 3.13"
   s.add_runtime_dependency "sqlite3", "~> 2.9"
   s.add_runtime_dependency "extlz4", "~> 0.3"
+  s.add_runtime_dependency "ruby-dbus", "~> 0.25"
+
 end
