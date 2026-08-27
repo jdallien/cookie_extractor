@@ -17,6 +17,7 @@ module Helpers
       placeholders = (["?"] * row.size).join(", ")
       db.execute("INSERT INTO #{table_name} VALUES (#{placeholders})", row)
     end
+    yield(db) if block_given?
     path
   ensure
     db&.close

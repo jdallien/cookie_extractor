@@ -7,7 +7,7 @@ module CookieExtractor
   class FirefoxCookieExtractor
     include Common
 
-    def initialize(cookie_file)
+    def initialize(cookie_file, app: nil, secrets: [])
       @cookie_file = cookie_file
       @recovery_file = File.dirname(@cookie_file) + '/sessionstore-backups/recovery.jsonlz4'
       @recovery_file = nil unless File.exist?(@recovery_file)
