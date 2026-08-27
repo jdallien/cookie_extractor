@@ -13,7 +13,7 @@ describe CookieExtractor::ChromeCookieExtractor do
         { 'host_key' => '.dallien.net',
           'path' => '/',
           'secure' => '0',
-          'expires_utc' => '1234567890',
+          'expires_utc' => 12_879_041_490_000_000,
           'name' => 'NAME',
           'value' => 'VALUE'})
       @extractor = CookieExtractor::ChromeCookieExtractor.new('filename')
@@ -42,7 +42,7 @@ describe CookieExtractor::ChromeCookieExtractor do
         { 'host_key' => 'jeff.dallien.net',
           'path' => '/path',
           'secure' => '1',
-          'expires_utc' => '1234567890',
+          'expires_utc' => 12_879_041_490_000_000,
           'name' => 'NAME',
           'value' => 'VALUE'})
       @extractor = CookieExtractor::ChromeCookieExtractor.new('filename')
@@ -71,7 +71,7 @@ describe CookieExtractor::ChromeCookieExtractor do
         { 'host_key' => '.dallien.net',
           'path' => '/',
           'secure' => '0',
-          'expires_utc' => '1234567890',
+          'expires_utc' => 12_879_041_490_000_000,
           'name' => 'NAME',
           'value' => 'VALUE'})
       @extractor = CookieExtractor::ChromeCookieExtractor.new('filename')
@@ -90,7 +90,7 @@ describe CookieExtractor::ChromeCookieExtractor do
         { 'host_key' => '.dallien.net',
           'path' => '/',
           'secure' => '1',
-          'expires_utc' => '1234567890',
+          'expires_utc' => 12_879_041_490_000_000,
           'name' => 'NAME',
           'value' => 'VALUE'})
       @extractor = CookieExtractor::ChromeCookieExtractor.new('filename')
@@ -109,7 +109,7 @@ describe CookieExtractor::ChromeCookieExtractor do
         { 'host_key' => '.dallien.net',
           'path' => '/',
           'is_secure' => '1',
-          'expires_utc' => '1234567890',
+          'expires_utc' => 12_879_041_490_000_000,
           'name' => 'NAME',
           'value' => 'VALUE'})
       @extractor = CookieExtractor::ChromeCookieExtractor.new('filename')
@@ -125,8 +125,8 @@ describe CookieExtractor::ChromeCookieExtractor do
   describe "with domain filter" do
     before :each do
       expect(@fake_cookie_db).to receive(:execute) do |&block|
-        block.call({'host_key' => '.example.com', 'path' => '/', 'is_secure' => '0', 'expires_utc' => '1787601234000', 'name' => 'NAME', 'value' => 'EXAMPLE VALUE'})
-        block.call({'host_key' => '.other.test', 'path' => '/', 'is_secure' => '0', 'expires_utc' => '1787601234000', 'name' => 'NAME2', 'value' => 'OTHER VALUE'})
+        block.call({'host_key' => '.example.com', 'path' => '/', 'is_secure' => '0', 'expires_utc' => 13_443_642_228_769_329, 'name' => 'NAME', 'value' => 'EXAMPLE VALUE'})
+        block.call({'host_key' => '.other.test', 'path' => '/', 'is_secure' => '0', 'expires_utc' => 13_429_994_993_015_941, 'name' => 'NAME2', 'value' => 'OTHER VALUE'})
       end
       @extractor = CookieExtractor::ChromeCookieExtractor.new('filename')
     end
@@ -135,11 +135,13 @@ describe CookieExtractor::ChromeCookieExtractor do
       result = @extractor.extract(domain: "example.com", format: :hash)
       expect(result.size).to eq(1)
       expect(result.first[:value]).to eq("EXAMPLE VALUE")
+      expect(result.first[:expires]).to eq(1799168628)
     end
 
     it "returns all when domain is nil" do
       result = @extractor.extract(format: :hash)
       expect(result.size).to eq(2)
+      expect(result.map {|r| r[:expires]}).to eq([1799168628, 1785521393])
     end
   end
 end
