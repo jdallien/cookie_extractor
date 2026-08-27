@@ -6,8 +6,8 @@ module CookieExtractor
   class NoCookieFileFoundException < Exception; end
 
   class BrowserDetector
-    CHROMIUM_BROWSERS = %w[chrome chromium].freeze
-    SUPPORTED_BROWSERS = (CHROMIUM_BROWSERS + %w[firefox]).freeze
+    CHROMIUM_APPS = %w[chrome chromium].freeze
+    SUPPORTED_APPS = (CHROMIUM_APPS + %w[firefox]).freeze
 
     # Returns the extractor of the most recently used browser's cookies
     #   or raise NoCookieFileFoundException if there are no cookies
@@ -26,9 +26,9 @@ module CookieExtractor
     end
 
     # Open a browser's cookie file using intelligent guesswork
-    def self.browser_extractor(browser, path = nil)
-      raise InvalidBrowserNameException, "Browser must be one of: #{self.supported_browsers.join(', ')}" unless browser.nil? || self.supported_browsers.include?(browser)
-      paths = path.nil? ? most_recently_used(cookie_locations(browser)) : [path]
+    def self.browser_extractor(app, path = nil)
+      raise InvalidBrowserNameException, "App/Browser must be one of: #{self.supported_apps.join(', ')}" unless app.nil? || self.supported_apps.include?(app)
+      paths = path.nil? ? most_recently_used(cookie_locations(app)) : [path]
       if paths.length < 1 or not File.exist?(paths.first)
         raise NoCookieFileFoundException, "File #{paths.first} does not exist!"
       end
@@ -44,8 +44,8 @@ module CookieExtractor
       end
     end
 
-    def self.supported_browsers
-      SUPPORTED_BROWSERS
+    def self.supported_apps
+      SUPPORTED_APPS
     end
 
     def self.detect_browser(db_filename)
@@ -65,12 +65,12 @@ module CookieExtractor
       db.table_info(table_name).size > 0
     end
 
-    def self.cookie_locations(browser = nil)
-      browsers = browser.nil? ? supported_browsers : [browser]
+    def self.cookie_locations(app = nil)
+      apps = app.nil? ? supported_apps : [app]
       locations = []
-      locations << "~/.config/google-chrome/Default/Cookies" if browsers.include?("chrome")
-      locations << "~/.config/chromium/Default/Cookies" if browsers.include?("chromium")
-      if browsers.include?("firefox")
+      locations << "~/.config/google-chrome/Default/Cookies" if apps.include?("chrome")
+      locations << "~/.config/chromium/Default/Cookies" if apps.include?("chromium")
+      if apps.include?("firefox")
         locations << "~/.mozilla/firefox/*.*default*/cookies.sqlite"
         locations << "~/.mozilla/firefox/*.Profile*/cookies.sqlite"
       end
