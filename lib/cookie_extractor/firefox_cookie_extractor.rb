@@ -36,15 +36,16 @@ module CookieExtractor
     def session_cookies(format:, domain:)
       return [] unless @recovery_file
       data = file_binread(@recovery_file)
-      if data[0..7] == "mozLz40\0"
-         json = LZ4.block_decode(data[12..-1])
-         recovery = JSON.parse(json)
-         recovery['cookies'].to_a.filter_map do |cookie|
-           next unless domain.nil? || cookie_applies?(cookie['host'], domain)
-           cookie_line(cookie['host'], cookie['path'], !!cookie['secure'], 0, cookie['name'], cookie['value'], format: format)
-         end
-      else
-        []
+      return [] if data.bytesize <= 12 || data.byteslice(0, 8) != "mozLz40\0"
+
+      uncompressed_size = data.byteslice(8, 4).unpack1("V")
+      compressed = data.byteslice(12, data.bytesize - 12)
+      max_dest_size = [uncompressed_size, 100 * 1024 * 1024].min
+      json = LZ4.block_decode(compressed, max_dest_size)
+      recovery = JSON.parse(json)
+      recovery['cookies'].to_a.filter_map do |cookie|
+        next unless domain.nil? || cookie_applies?(cookie['host'], domain)
+        cookie_line(cookie['host'], cookie['path'], !!cookie['secure'], 0, cookie['name'], cookie['value'], format: format)
       end
     end
 
